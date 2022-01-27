@@ -118,6 +118,13 @@ sub Configure {
         ValueRegex  => qr/.*/smx,
     );
     $Self->AddOption(
+        Name        => 'mail-subject',
+        Description => "Subject for the email which has the generated statistics file attached.",
+        Required    => 0,
+        HasValue    => 1,
+        ValueRegex  => qr/.*/smx,
+    );
+    $Self->AddOption(
         Name        => 'mail-body',
         Description => "Body content for the email which has the generated statistics file attached.",
         Required    => 0,
@@ -407,6 +414,15 @@ sub Run {
         }
     }
 
+    # generate subject for email
+    my $Subject;
+    if ( $Self->GetOption('mail-subject') ) {
+        $Subject = $Self->GetOption('mail-subject');
+    }
+    else {
+        $Subject = "[Stats - $CountStatArray Records] $Title; Created: $Time";
+    }
+
     # send email
     RECIPIENT:
     for my $Recipient ( @{ $Self->GetOption('mail-recipient') // [] } ) {
@@ -424,7 +440,7 @@ sub Run {
         my $Result = $Kernel::OM->Get('Kernel::System::Email')->Send(
             From       => $Self->GetOption('mail-sender'),
             To         => $Recipient,
-            Subject    => "[Stats - $CountStatArray Records] $Title; Created: $Time",
+            Subject    => $Subject,
             Body       => $Kernel::OM->Get('Kernel::Language')->Translate( $Self->{MailBody} ),
             Charset    => 'utf-8',
             Attachment => [ {%Attachment}, ],
