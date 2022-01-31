@@ -415,13 +415,7 @@ sub Run {
     }
 
     # generate subject for email
-    my $Subject;
-    if ( $Self->GetOption('mail-subject') ) {
-        $Subject = $Self->GetOption('mail-subject');
-    }
-    else {
-        $Subject = "[Stats - $CountStatArray Records] $Title; Created: $Time";
-    }
+    my $Subject = $Self->GetOption('mail-subject') || "[Stats - $CountStatArray Records] $Title; Created: $Time";
 
     # send email
     RECIPIENT:
@@ -440,7 +434,7 @@ sub Run {
         my $Result = $Kernel::OM->Get('Kernel::System::Email')->Send(
             From       => $Self->GetOption('mail-sender'),
             To         => $Recipient,
-            Subject    => $Subject,
+            Subject    => $Kernel::OM->Get('Kernel::Language')->Translate( $Subject),
             Body       => $Kernel::OM->Get('Kernel::Language')->Translate( $Self->{MailBody} ),
             Charset    => 'utf-8',
             Attachment => [ {%Attachment}, ],
